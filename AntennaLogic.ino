@@ -3,14 +3,10 @@
 #include <Servo.h>
 #include <IRremote.h>
 
-// comment for git and then some
-// second line
-// are we being monitored?
-// I hope so.
 
 #define servoRotatePin 4
 #define rotateClockwise 1
-constexpr auto rotateCounterClockwise = 2;
+#define rotateCounterClockwise 2
 Servo servoRotate;
 const int RECV_PIN = 3;
 #define interruptPin3  1
@@ -18,7 +14,7 @@ const int RECV_PIN = 3;
 #define antennaLeftRightPin 8
 #define twinkleLightsOnOff 11
 
-IRrecv irrecv(RECV_PIN);
+// IRrecv irrecv(RECV_PIN);
 uint16_t command; // decoded command;
 decode_results results;
 
@@ -36,12 +32,13 @@ volatile int state = LOW;  // relay off left connector
 void setup() {
   
   Serial.begin(9600);
-  irrecv.enableIRIn(); // Start the receiver
+  // irrecv.enableIRIn(); // Start the receiver
+  IrReceiver.begin(RECV_PIN);
   Serial.println("Start");
   pinMode (servoRotatePin, OUTPUT);
   
   servoRotate.attach(servoRotatePin);
-    servoRotate.write(90);
+    servoRotate.write(45);
     delay(100);
     pinMode(LED_BUILTIN,OUTPUT);
     pinMode(antennaLeftRightPin, OUTPUT);
@@ -71,8 +68,9 @@ void loop() {
        // channel 2, 6 & 8 position
        if ( command == 130 )
        {
-          currentPosRotate = 90;
+          currentPosRotate = 45;
           servoRotate.write(currentPosRotate);
+          delay(300);
           currentButton = 0;
        }
        // channel 12 position
@@ -80,6 +78,7 @@ void loop() {
        {
           currentPosRotate = 150;
           servoRotate.write(currentPosRotate);
+          delay(300);
           currentButton = 0;
        }
        // Antenna 1 
@@ -122,24 +121,22 @@ void loop() {
       case rotateClockwise:
       button = 0;
         currentPosRotate += 5;
-        
+       
         if(currentPosRotate > 180){
-             currentPosRotate -= 5;
              currentPosRotate = 180;
         }
         Serial.print("Rotate to ");
         Serial.println(currentPosRotate);
         servoRotate.write(currentPosRotate);
-        delay(100);
+        delay(300);
 //        sleepNow();
         break;
 
       case rotateCounterClockwise:
         currentPosRotate -= 5;
         button = 0; 
-        if(currentPosRotate <= 0){
-             currentPosRotate += 5;
-             currentPosRotate = 180;
+        if(currentPosRotate <= 0){           
+             currentPosRotate = 0;
         }
         Serial.print("Rotate to ");
         Serial.println(currentPosRotate);
@@ -190,7 +187,7 @@ detachInterrupt(interruptPin3);
 
 void wakeupNow(){
   sleep_disable();
-  irrecv.resume();
+  // irrecv.resume();
 }
 
  
